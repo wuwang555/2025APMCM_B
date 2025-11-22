@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from Q1.Q1 import LiteratureCalibratedPDMSModel
+from Q1.Q1  import LiteratureCalibratedPDMSModel
 from Q2.Q2 import LiteratureBasedRadiativeCoolingEvaluator, CostAnalysis
 from Q3.Q3_base_reality import PhysicsBasedMultiLayerDesign, LayerNumberOptimizer
 
@@ -74,6 +74,7 @@ class EnhancedCostAnalysis(CostAnalysis):
             'layer_costs': layer_costs
         }
 
+
 class ComprehensiveRadiativeCoolingOptimizer:
     """辐射制冷综合优化设计器 - 问题四解决方案"""
 
@@ -84,7 +85,7 @@ class ComprehensiveRadiativeCoolingOptimizer:
         self.cost_analyzer = CostAnalysis()
         self.enhanced_cost_analyzer = EnhancedCostAnalysis()
 
-        # 最优设计配置（基于前三个问题的结果）
+        # 最优设计配置（基于前三个问题的结果）- 修正结构定义
         self.optimal_designs = {
             'single_layer': {
                 'structure': [('PDMS', 11000)],
@@ -97,7 +98,7 @@ class ComprehensiveRadiativeCoolingOptimizer:
                 'description': '三层最优设计(Ag/SiO₂/PDMS)'
             },
             'multilayer_advanced': {
-                'structure': [('Ag', 100), ('SiO2', 200), ('TiO2', 150), ('PDMS', 11000)],  # 确保是四层
+                'structure': [('Ag', 100), ('SiO2', 200), ('TiO2', 150), ('PDMS', 11000)],
                 'performance': 146.6,
                 'description': '四层增强设计(Ag/SiO₂/TiO₂/PDMS)'
             }
@@ -111,29 +112,18 @@ class ComprehensiveRadiativeCoolingOptimizer:
         """修正的综合性能评估"""
         design = self.optimal_designs[design_key]
 
-        # 使用设计配置中的性能数据，确保一致性
-        # actual_performance = design['performance']
-
         # 光学性能分析
         optical_performance = self.multilayer_designer.calculate_structure_performance(
             design['structure']
         )
-        # optical_performance['performance'] = actual_performance
 
         # 修正的成本分析 - 使用多层结构成本计算
-        total_cost = self.multilayer_designer.calculate_structure_cost(design['structure'])
-
-        # 成本分析使用修正后的方法
         cost_data = self.enhanced_cost_analyzer.calculate_multilayer_costs(
             design['structure'],
             design['performance']
         )
-        # 调试：打印成本数据
-        print(f"🔍 成本调试 - {design_key}:")
-        print(f"   总成本: ${cost_data['total_cost']}")
-        print(f"   材料成本: ${cost_data['material_cost']}")
-        print(f"   各层成本: {cost_data['layer_costs']}")
-        # 环境适应性分析（保持不变）
+
+        # 环境适应性分析
         environment_performances = []
         for env_name, env_profile in self.evaluator.environment_profiles.items():
             pdms_thickness = None
@@ -160,30 +150,6 @@ class ComprehensiveRadiativeCoolingOptimizer:
             'technical_feasibility': self.assess_technical_feasibility(design),
             'manufacturing_feasibility': self.assess_manufacturing_feasibility(design)
         }
-
-    def calculate_realistic_cost(self, structure):
-        """修正的成本计算模型"""
-        cost_breakdown = {
-            'Ag': 0.8,  # 美元/纳米/m²
-            'Al': 0.3,  # 美元/纳米/m²
-            'SiO2': 0.1,  # 美元/纳米/m²
-            'TiO2': 0.4,  # 美元/纳米/m²
-            'PDMS': 0.025  # 美元/纳米/m² (PDMS相对便宜)
-        }
-
-        material_cost = 0
-        for material, thickness in structure:
-            material_cost += cost_breakdown[material] * thickness
-
-        # 制造复杂度成本（随层数增加）
-        fabrication_cost = 10 + 5 * len(structure)
-
-        # 固定成本
-        substrate_cost = 8.0
-        installation_cost = 5.0
-
-        total_cost = material_cost + fabrication_cost + substrate_cost + installation_cost
-        return total_cost
 
     def assess_technical_feasibility(self, design):
         """技术可行性评估"""
@@ -221,7 +187,7 @@ class ComprehensiveRadiativeCoolingOptimizer:
             'quality_control': '标准光学检测方法'
         }
 
-        print(f"🔧 调试: 处理设计结构，层数={len(design['structure'])}")  # 调试信息
+        print(f"🔧 调试: 处理设计结构，层数={len(design['structure'])}")
 
         # 确保正确处理所有层
         for i, (material, thickness) in enumerate(design['structure']):
@@ -232,7 +198,7 @@ class ComprehensiveRadiativeCoolingOptimizer:
                 process = f'第{i + 1}层: {material} - PECVD ({thickness}nm)'
                 equipment = 'PECVD设备'
             elif material in ['TiO2']:
-                process = f'第{i + 1}层: {material} - 原子层沉积 ({thickness}nm)'  # TiO2通常用ALD
+                process = f'第{i + 1}层: {material} - 原子层沉积 ({thickness}nm)'
                 equipment = '原子层沉积设备'
             elif material == 'PDMS':
                 process = f'第{i + 1}层: PDMS - 旋涂+固化 ({thickness}nm)'
@@ -245,8 +211,6 @@ class ComprehensiveRadiativeCoolingOptimizer:
             if equipment not in manufacturing['equipment_requirements']:
                 manufacturing['equipment_requirements'].append(equipment)
 
-            print(f"🔧 调试: 添加第{i + 1}层: {material}, 厚度={thickness}nm")  # 调试信息
-
         # 根据层数调整良率估计
         layer_count = len(design['structure'])
         if layer_count <= 2:
@@ -256,12 +220,10 @@ class ComprehensiveRadiativeCoolingOptimizer:
         else:
             manufacturing['yield_estimation'] = '80-88%'
 
-        print(f"🔧 调试: 最终工艺流程有 {len(manufacturing['process_flow'])} 个步骤")  # 调试信息
-
         return manufacturing
 
     def economic_analysis(self, evaluation_results):
-        """详细经济性分析"""
+        """修正的详细经济性分析"""
         design = evaluation_results['design_info']
         cost_data = evaluation_results['cost_data']
 
@@ -282,7 +244,7 @@ class ComprehensiveRadiativeCoolingOptimizer:
             'total_operating_cost_per_m2': cost_data['total_cost']
         }
 
-        # 收益分析
+        # 收益分析 - 修正：使用正确的冷却功率
         cooling_power = design['performance']
         daily_operation_hours = 10
         electricity_price = 0.15  # 美元/kWh
@@ -314,7 +276,7 @@ class ComprehensiveRadiativeCoolingOptimizer:
             },
             'investment_metrics': {
                 'payback_period': payback_period,
-                'roi_first_year': annual_profit / capital_investment['total_investment'] * 100,
+                'roi_first_year': annual_profit / capital_investment['total_investment'] * 100 if capital_investment['total_investment'] > 0 else 0,
                 'npv_5years': self.calculate_npv(annual_profit, 5, 0.1) - capital_investment['total_investment']
             }
         }
@@ -357,7 +319,7 @@ class ComprehensiveRadiativeCoolingOptimizer:
             perf_score = comp['performance'] / 150.0
 
             # 成本效益评分 - 更重视
-            cost_eff_score = min(comp['cost_effectiveness'] / 3.0, 1.0)  # 基准3W/$
+            cost_eff_score = min(comp['cost_effectiveness'] / 3.0, 1.0)
 
             # 可行性评分
             feasibility_score = 1.0 if comp['technical_feasibility'] == '高' else 0.7
@@ -372,10 +334,10 @@ class ComprehensiveRadiativeCoolingOptimizer:
 
             # 调整权重：经济性权重增加
             comp['comprehensive_score'] = (
-                    perf_score * 0.25 +  # 性能权重降低
-                    cost_eff_score * 0.35 +  # 成本效益权重增加
+                    perf_score * 0.25 +
+                    cost_eff_score * 0.35 +
                     feasibility_score * 0.2 +
-                    payback_score * 0.2  # 投资回收期权重增加
+                    payback_score * 0.2
             )
 
         # 选择最优方案
@@ -388,6 +350,7 @@ class ComprehensiveRadiativeCoolingOptimizer:
                   f"成本效益{comp['cost_effectiveness']:.2f}W/$, 回收期{comp['payback_period']:.2f}年")
 
         return best_design, comparisons
+
 
 def run_problem4_comprehensive_solution():
     """运行问题四综合解决方案 - 带验证"""
@@ -438,8 +401,17 @@ def run_problem4_comprehensive_solution():
     print(f"成本效益: {best_design['cost_effectiveness']:.2f} W/$")
     print(f"投资回收期: {best_design['payback_period']:.2f} 年")
 
-    # 详细技术经济性报告
-    best_evaluation = design_evaluations['multilayer_advanced']  # 确保使用四层设计
+    # 修正：使用正确的设计评估
+    best_design_key = None
+    for key, design in optimizer.optimal_designs.items():
+        if design['description'] == best_design['design_name']:
+            best_design_key = key
+            break
+
+    if best_design_key is None:
+        best_design_key = 'multilayer_optimal'  # 默认使用三层设计
+
+    best_evaluation = design_evaluations[best_design_key]
     economic_analysis = optimizer.economic_analysis(best_evaluation)
 
     print(f"\n💰 详细经济性分析:")
@@ -464,13 +436,13 @@ def run_problem4_comprehensive_solution():
     print(f"  预计良率: {manufacturing['yield_estimation']}")
     print(f"  生产效率: {manufacturing['production_rate']}")
     print("  工艺流程:")
-    # 修正：确保显示所有制造步骤
     for step in manufacturing['process_flow']:
         print(f"    • {step}")
 
     print(f"\n🌍 环境适应性:")
     for env_perf in best_evaluation['environment_performances']:
         print(f"  {env_perf['location']}: {env_perf['P_net']:.1f} W/m² (ΔT={env_perf['delta_T']:.1f}K)")
+
     # 应用场景建议
     print(f"\n🎯 推荐应用场景:")
     applications = [
@@ -505,8 +477,8 @@ def plot_comprehensive_results(optimizer, best_design, comparisons, design_evalu
 
     # 1. 设计方案综合对比雷达图
     design_names = [comp['design_name'] for comp in comparisons]
-    performance_scores = [comp['performance'] / 150 for comp in comparisons]  # 归一化
-    cost_scores = [1 - (comp['cost_per_m2'] / 60) for comp in comparisons]  # 成本越低越好，基准60美元
+    performance_scores = [comp['performance'] / 150 for comp in comparisons]
+    cost_scores = [1 - (comp['cost_per_m2'] / 60) for comp in comparisons]
     feasibility_scores = [0.9 if comp['technical_feasibility'] == '高' else 0.7 for comp in comparisons]
     payback_scores = [1 - min(comp['payback_period'] / 5, 1) for comp in comparisons]
 
@@ -514,7 +486,7 @@ def plot_comprehensive_results(optimizer, best_design, comparisons, design_evalu
 
     for i, design_name in enumerate(design_names):
         values = [performance_scores[i], cost_scores[i], feasibility_scores[i], payback_scores[i]]
-        values += values[:1]  # 闭合雷达图
+        values += values[:1]
         angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
         angles += angles[:1]
 
@@ -542,13 +514,21 @@ def plot_comprehensive_results(optimizer, best_design, comparisons, design_evalu
     ax2.set_title('推荐方案技术经济性指标', fontsize=14, fontweight='bold')
     ax2.grid(True, alpha=0.3)
 
-    # 添加数值标签
     for bar, metric, value in zip(bars, metrics, best_values):
         ax2.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.02,
                  f'{value:.2f}', ha='center', va='bottom', fontweight='bold')
 
-    # 3. 成本结构分析 - 修正：使用实际成本数据
-    best_eval = design_evaluations['multilayer_advanced']
+    # 3. 成本结构分析
+    best_design_key = None
+    for key, design in optimizer.optimal_designs.items():
+        if design['description'] == best_design['design_name']:
+            best_design_key = key
+            break
+
+    if best_design_key is None:
+        best_design_key = 'multilayer_optimal'
+
+    best_eval = design_evaluations[best_design_key]
     cost_data = best_eval['cost_data']
 
     # 计算各材料实际成本
@@ -568,14 +548,14 @@ def plot_comprehensive_results(optimizer, best_design, comparisons, design_evalu
 
     # 添加材料成本
     material_colors = {
-        'Ag': '#FF6B6B',  # 红色 - 银
-        'SiO2': '#4ECDC4',  # 青色 - 二氧化硅
-        'TiO2': '#45B7D1',  # 蓝色 - 二氧化钛
-        'PDMS': '#96CEB4'  # 绿色 - PDMS
+        'Ag': '#FF6B6B',
+        'SiO2': '#4ECDC4',
+        'TiO2': '#45B7D1',
+        'PDMS': '#96CEB4'
     }
 
     for material, cost in material_costs.items():
-        if cost > 0:  # 只显示有成本的材料
+        if cost > 0:
             cost_labels.append(f'{material}材料')
             cost_values.append(cost)
             colors.append(material_colors.get(material, '#F8E71C'))
@@ -588,9 +568,9 @@ def plot_comprehensive_results(optimizer, best_design, comparisons, design_evalu
     }
 
     other_colors = {
-        '制造工艺': '#FFA07A',  # 浅鲑鱼色
-        '衬底': '#98D8C8',  # 薄荷绿
-        '安装': '#F7DC6F'  # 淡黄色
+        '制造工艺': '#FFA07A',
+        '衬底': '#98D8C8',
+        '安装': '#F7DC6F'
     }
 
     for label, cost in other_costs.items():
@@ -600,10 +580,9 @@ def plot_comprehensive_results(optimizer, best_design, comparisons, design_evalu
             colors.append(other_colors.get(label, '#BB8FCE'))
 
     # 绘制饼图
-    if cost_values:  # 确保有成本数据
+    if cost_values:
         wedges, texts, autotexts = ax3.pie(cost_values, labels=cost_labels, autopct='%1.1f%%',
                                            startangle=90, colors=colors)
-        # 设置百分比文本样式
         for autotext in autotexts:
             autotext.set_color('white')
             autotext.set_fontweight('bold')
@@ -626,7 +605,6 @@ def plot_comprehensive_results(optimizer, best_design, comparisons, design_evalu
     ax4.set_title('不同环境条件下的性能表现', fontsize=14, fontweight='bold')
     ax4.grid(True, alpha=0.3)
 
-    # 添加数值标签
     for bar, power in zip(bars, cooling_powers):
         ax4.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 2,
                  f'{power:.1f}', ha='center', va='bottom', fontweight='bold')
@@ -635,23 +613,21 @@ def plot_comprehensive_results(optimizer, best_design, comparisons, design_evalu
     plt.savefig('problem4_comprehensive_analysis.png', dpi=300, bbox_inches='tight')
     plt.show()
 
+
 def generate_final_report(optimizer, best_design, comparisons, design_evaluations):
     """修正的最终技术报告生成"""
 
-    # 确保找到正确的设计评估
-    best_eval = None
-    for design_key, evaluation in design_evaluations.items():
-        if evaluation['design_info']['description'] == best_design['design_name']:
-            best_eval = evaluation
-            print(f"✅ 找到匹配的设计评估: {best_design['design_name']}")
-            # 调试：打印实际找到的制造流程步骤数
-            actual_steps = len(evaluation['manufacturing_feasibility']['process_flow'])
-            print(f"✅ 实际制造流程步骤数: {actual_steps}")
+    # 修正：正确匹配设计评估
+    best_design_key = None
+    for key, design in optimizer.optimal_designs.items():
+        if design['description'] == best_design['design_name']:
+            best_design_key = key
             break
 
-    if best_eval is None:
-        print("⚠️ 未找到匹配的设计评估，使用默认")
-        best_eval = next(iter(design_evaluations.values()))
+    if best_design_key is None:
+        best_design_key = 'multilayer_optimal'
+
+    best_eval = design_evaluations[best_design_key]
 
     # 确保使用正确的结构描述
     actual_structure = best_eval['design_info']['structure']
@@ -660,9 +636,11 @@ def generate_final_report(optimizer, best_design, comparisons, design_evaluation
 
     # 确保制造流程与结构匹配
     manufacturing_steps = len(best_eval['manufacturing_feasibility']['process_flow'])
-    print(f"✅ 制造流程验证: 设计{layer_count}层 vs 流程{manufacturing_steps}步")
 
-    # 生成报告 - 修正制造流程显示部分
+    # 经济分析
+    economic_data = optimizer.economic_analysis(best_eval)
+
+    # 生成报告
     report = f"""
 ## 执行摘要
 
@@ -682,25 +660,24 @@ def generate_final_report(optimizer, best_design, comparisons, design_evaluation
 - **结构配置**: {structure_desc} ({layer_count}层结构)
 - **技术原理**: 
   - Ag层提供高太阳反射(>96%)
-  - SiO₂/TiO₂介电层实现干涉增强和抗反射
+  - SiO₂介电层实现干涉增强和抗反射
   - PDMS层在大气窗口具有高发射率(>95%)
 
 ### 性能优势
 - 相比单层PDMS性能提升 {((best_design['performance'] - 101.1) / 101.1 * 100):.1f}%
-- 选择性比达到 {best_eval['optical_performance']['selectivity']:.2f}，远超行业基准(>15)
 - 在干旱沙漠环境下冷却功率可达 {max([env['P_net'] for env in best_eval['environment_performances']]):.1f} W/m²
 
 ## 经济可行性
 
 ### 投资分析
 - **单位面积成本**: ${best_eval['cost_data']['total_cost']:.2f}/m²
-- **设备投资**: ${optimizer.economic_analysis(best_eval)['capital_investment']['total_investment']:,.0f} (10,000 m²/年产能)
-- **年利润**: ${optimizer.economic_analysis(best_eval)['revenue_analysis']['annual_profit']:,.0f}
+- **设备投资**: ${economic_data['capital_investment']['total_investment']:,.0f} (10,000 m²/年产能)
+- **年利润**: ${economic_data['revenue_analysis']['annual_profit']:,.0f}
 - **投资回收期**: {best_design['payback_period']:.2f} 年
 
 ### 成本效益
 - 每美元投资可获得 **{best_design['cost_effectiveness']:.2f} W** 冷却功率
-- 5年净现值: **${optimizer.economic_analysis(best_eval)['investment_metrics']['npv_5years']:,.0f}**
+- 5年净现值: **${economic_data['investment_metrics']['npv_5years']:,.0f}**
 
 ## 技术与制造可行性
 
@@ -726,7 +703,7 @@ def generate_final_report(optimizer, best_design, comparisons, design_evaluation
 ## 环境与社会效益
 
 ### 节能效果
-- 每平方米年节电量: {optimizer.economic_analysis(best_eval)['revenue_analysis']['annual_energy_saving_per_m2']:.1f} kWh
+- 每平方米年节电量: {economic_data['revenue_analysis']['annual_energy_saving_per_m2']:.1f} kWh
 - CO₂减排量: ~0.5吨/平方米/年(基于电网平均碳排放)
 
 ### 应用前景
